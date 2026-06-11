@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 
+app.use(express.json());
+
 // ✅ Root API endpoint
 app.get('/api/', (req, res) => {
   res.json({
@@ -16,42 +18,42 @@ app.get('/api/', (req, res) => {
 app.get('/api/test', (req, res) => {
   res.json({
     message: "API is working ✅",
-    timestamp: new Date(),
+    timestamp: new Date().toISOString()
   });
 });
 
-// ✅ ✅ CRITICAL: Roles endpoint for SWA Custom Auth
-app.get('/api/getRolesForUsers', (req, res) => {
-  const userHeader = req.headers['x-ms-client-principal'];
-
-  // ❌ No user → no roles
-  if (!userHeader) {
-    return res.json({ roles: [] });
-  }
-
+// ✅ Roles endpoint for SWA Custom Auth
+// SWA custom role assignment calls this path so it can get back a roles list.
+// It should return JSON containing roles.
+app.post('/api/getRolesForUsers', (req, res) => {
   try {
-    const decoded = Buffer.from(userHeader, 'base64').toString('utf8');
-    const user = JSON.parse(decoded);
+    const user = req.body;
 
-    console.log("User from SWA:", user);
+    // If SWA didn't send user details, no roles
+    if (!user) {
+      return res.json({ roles: [] });
+    }
 
-    // ✅ Assign all authenticated users
-    return res.json({
-      roles: ["authenticated"]
-    });
-
+    // Minimal working model:
+    // any authenticated user gets the 'authenticated' role
+    return res.json({ roles: ['authenticated'] });
   } catch (err) {
-    console.error("Error parsing user:", err);
-
+    console.error('Role assignment error:', err);
     return res.status(500).json({
       roles: [],
-      error: "Failed to parse user identity"
+      error: 'Unable to assign roles'
     });
   }
 });
 
-const port = process.env.PORT || 3000;
+// Optional GET handler so you can see something useful if you browse to it manually
+app.get('/api/getRolesForUsers', (req, res) => {
+  res.json({
+    message: "Roles endpoint is live. SWA will call this endpoint during sign-in using POST."
+  });
+});
 
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
