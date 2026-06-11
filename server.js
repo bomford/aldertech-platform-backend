@@ -1,16 +1,12 @@
-app.get('/api/secure', (req, res) => {
-  const userHeader = req.headers['x-ms-client-principal'];
+const http = require('http');
 
-  if (!userHeader) {
-    return res.status(401).json({ message: "Not authenticated" });
-  }
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('API is running ✅');
+});
 
-  const user = JSON.parse(
-    Buffer.from(userHeader, 'base64').toString('utf8')
-  );
+const port = process.env.PORT || 3000;
 
-  res.json({
-    message: "User is authenticated ✅",
-    user: user.userDetails
-  });
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
