@@ -23,13 +23,11 @@ app.get('/api/test', (req, res) => {
 });
 
 // ✅ Roles endpoint for SWA Custom Auth
-// SWA custom role assignment calls this path so it can get back a roles list.
-// It should return JSON containing roles.
+// SWA custom role assignment should call this so it can get back a roles list.
 app.post('/api/getRolesForUsers', (req, res) => {
   try {
     const user = req.body;
 
-    // If SWA didn't send user details, no roles
     if (!user) {
       return res.json({ roles: [] });
     }
@@ -46,7 +44,7 @@ app.post('/api/getRolesForUsers', (req, res) => {
   }
 });
 
-// Optional GET handler so you can see something useful if you browse to it manually
+// Optional GET handler so you can browse to it manually and see something useful
 app.get('/api/getRolesForUsers', (req, res) => {
   res.json({
     message: "Roles endpoint is live. SWA will call this endpoint during sign-in using POST."
