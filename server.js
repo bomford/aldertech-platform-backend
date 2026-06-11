@@ -1,33 +1,33 @@
 const express = require('express');
 const app = express();
 
-// ✅ Root endpoint (important for Azure health check)
+// Root endpoint - useful for testing App Service directly
 app.get('/', (req, res) => {
   res.send('API root OK ✅');
 });
 
-// ✅ API root
+// API root
 app.get('/api/', (req, res) => {
   res.json({
-    message: "API root working ✅",
-    availableEndpoints: ["/api/test"]
+    message: 'API root working ✅',
+    availableEndpoints: ['/api/test', '/api/secure']
   });
 });
 
-// ✅ Test endpoint
+// Test endpoint
 app.get('/api/test', (req, res) => {
   res.json({
-    message: "API is working ✅",
-    timestamp: new Date()
+    message: 'API is working ✅',
+    timestamp: new Date().toISOString()
   });
 });
 
-// ✅ Optional secure example
+// Secure example endpoint
 app.get('/api/secure', (req, res) => {
   const header = req.headers['x-ms-client-principal'];
 
   if (!header) {
-    return res.status(401).json({ message: "Not authenticated" });
+    return res.status(401).json({ message: 'Not authenticated' });
   }
 
   const user = JSON.parse(
@@ -35,7 +35,7 @@ app.get('/api/secure', (req, res) => {
   );
 
   return res.json({
-    message: "Secure endpoint ✅",
+    message: 'Secure endpoint ✅',
     user: user.userDetails
   });
 });
